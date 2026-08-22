@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
+    "sync-routes": "node scripts/sync-route-pages.mjs",
     "check": "node scripts/check-pages.mjs"
   },
   "dependencies": {},
