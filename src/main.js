@@ -3,6 +3,7 @@ import { externalLinkMap, officialLinks, pageExpansions, pageQualityLayers, page
 const root = document.querySelector('#root');
 const discoveredBasePath = new URL('../', import.meta.url).pathname.replace(/\/$/, '');
 const APP_BASE_PATH = window.__APP_BASE_PATH__ || (discoveredBasePath === '/' ? '' : discoveredBasePath);
+const SITE_URL = 'https://robertwei20.github.io/iron-nest-wiki';
 const icons = {
   book: 'B',
   flag: 'F',
@@ -59,19 +60,53 @@ const notFoundSeo = {
   description: 'The requested Iron Nest guide page was not found.',
 };
 
-function setSeo(page) {
+function publicUrlForPath(path) {
+  return `${SITE_URL}${path}`;
+}
+
+function setMetaContent(selector, content, createAttrs = {}) {
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement('meta');
+    for (const [key, value] of Object.entries(createAttrs)) element.setAttribute(key, value);
+    document.head.appendChild(element);
+  }
+  element.setAttribute('content', content);
+}
+
+function setCanonical(href) {
+  let element = document.head.querySelector('link[rel="canonical"]');
+  if (!element) {
+    element = document.createElement('link');
+    element.setAttribute('rel', 'canonical');
+    document.head.appendChild(element);
+  }
+  element.setAttribute('href', href);
+}
+
+function canonicalPathForRoute(route) {
+  if (route.type === 'guides') return '/guides/';
+  if (route.type === 'article') return `/${route.page.slug}/`;
+  return '/';
+}
+
+function setSeo(page, route) {
   const title = page?.title ? `${page.title} - Iron Nest Wiki` : 'Iron Nest Wiki - Guide, Missions & Calculator';
+  const description =
+    page?.description ||
+    'Fan-made Iron Nest wiki for beginner guides, mission walkthroughs, triangulation, shell choices, counter-battery tips, endings, and roadmap updates.';
+  const keywords = `${page?.keyword || 'Iron Nest'}, guide, missions, triangulation, shell types`;
+  const canonicalUrl = publicUrlForPath(canonicalPathForRoute(route));
+  const robots = route?.type === 'not-found' ? 'noindex, follow' : 'index, follow';
+
   document.title = title.length <= 60 ? title : page.title;
-  document
-    .querySelector('meta[name="description"]')
-    ?.setAttribute(
-      'content',
-      page?.description ||
-        'Fan-made Iron Nest wiki for beginner guides, mission walkthroughs, triangulation, shell choices, counter-battery tips, endings, and roadmap updates.',
-    );
-  document
-    .querySelector('meta[name="keywords"]')
-    ?.setAttribute('content', `${page?.keyword || 'Iron Nest'}, guide, missions, triangulation, shell types`);
+  setMetaContent('meta[name="description"]', description, { name: 'description' });
+  setMetaContent('meta[name="keywords"]', keywords, { name: 'keywords' });
+  setMetaContent('meta[name="robots"]', robots, { name: 'robots' });
+  setMetaContent('meta[property="og:title"]', document.title, { property: 'og:title' });
+  setMetaContent('meta[property="og:description"]', description, { property: 'og:description' });
+  setMetaContent('meta[property="og:url"]', canonicalUrl, { property: 'og:url' });
+  setCanonical(canonicalUrl);
 }
 
 function header() {
@@ -527,7 +562,7 @@ function footer() {
 
 function render() {
   const route = getRoute();
-  setSeo(route.page);
+  setSeo(route.page, route);
   const body = {
     home: homePage,
     guides: () => guideIndex(false),
