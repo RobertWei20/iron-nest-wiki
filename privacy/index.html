@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy - Iron Nest Wiki</title>
+    <meta name="description" content="Privacy policy for Iron Nest Wiki, including how this fan-made guide site uses Google Analytics and external links." />
+    <meta name="keywords" content="Iron Nest Wiki privacy, Google Analytics, fan-made guide site" />
+    <meta name="robots" content="noindex, follow" />
+    <!-- managed-seo-start -->
+    <link rel="canonical" href="https://robertwei20.github.io/iron-nest-wiki/privacy/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Iron Nest Wiki" />
+    <meta property="og:title" content="Privacy Policy - Iron Nest Wiki" />
+    <meta property="og:description" content="Privacy policy for Iron Nest Wiki, including how this fan-made guide site uses Google Analytics and external links." />
+    <meta property="og:url" content="https://robertwei20.github.io/iron-nest-wiki/privacy/" />
+    <!-- managed-seo-end -->
+    <script>
+      window.__GA_MEASUREMENT_ID__ = 'G-DD14D5SECD';
+      (() => {
+        const gaId = window.__GA_MEASUREMENT_ID__;
+        if (!/^G-[A-Z0-9]+$/.test(gaId)) return;
+
+        const gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+        document.head.appendChild(gtagScript);
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag() {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', gaId);
+      })();
+    </script>
+    <script>
+      (() => {
+        const repoBase = '/iron-nest-wiki';
+        window.__APP_BASE_PATH__ =
+          window.location.pathname === repoBase || window.location.pathname.startsWith(`${repoBase}/`) ? repoBase : '';
+
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = `${window.__APP_BASE_PATH__}/src/styles.css`;
+        document.head.appendChild(stylesheet);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      (() => {
+        const app = document.createElement('script');
+        app.type = 'module';
+        app.src = `${window.__APP_BASE_PATH__ || ''}/src/main.js`;
+        document.body.appendChild(app);
+      })();
+    </script>
+  </body>
+</html>

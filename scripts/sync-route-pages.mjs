@@ -27,6 +27,16 @@ const guideIndexSeo = {
   keywords: 'Iron Nest guides, Iron Nest wiki, Iron Nest walkthrough, Iron Nest missions',
 };
 
+const privacySeo = {
+  path: '/privacy/',
+  outputDirectory: join(root, 'privacy'),
+  title: 'Privacy Policy - Iron Nest Wiki',
+  description:
+    'Privacy policy for Iron Nest Wiki, including how this fan-made guide site uses Google Analytics and external links.',
+  keywords: 'Iron Nest Wiki privacy, Google Analytics, fan-made guide site',
+  robots: 'noindex, follow',
+};
+
 const articleRoutes = pages.map((page) => ({
   path: `/${page.slug}/`,
   outputDirectory: join(root, page.slug),
@@ -36,6 +46,7 @@ const articleRoutes = pages.map((page) => ({
 }));
 
 const publicRoutes = [homeSeo, guideIndexSeo, ...articleRoutes];
+const staticRoutes = [...publicRoutes, privacySeo];
 
 const notFoundSeo = {
   path: '/',
@@ -47,7 +58,7 @@ const notFoundSeo = {
   robots: 'noindex, follow',
 };
 
-for (const route of publicRoutes) {
+for (const route of staticRoutes) {
   await mkdir(route.outputDirectory, { recursive: true });
   await writeFile(join(route.outputDirectory, 'index.html'), renderSeoShell(route));
 }
@@ -56,7 +67,9 @@ await writeFile(join(root, '404.html'), renderSeoShell(notFoundSeo));
 await writeFile(join(root, 'sitemap.xml'), renderSitemap(publicRoutes));
 await writeFile(join(root, 'robots.txt'), renderRobots());
 
-console.log(`Synced ${publicRoutes.length} public route entry files, 404.html, sitemap.xml, and robots.txt.`);
+console.log(
+  `Synced ${staticRoutes.length} static route entry files, ${publicRoutes.length} sitemap URLs, 404.html, sitemap.xml, and robots.txt.`,
+);
 
 function renderSeoShell(route) {
   const canonicalUrl = publicUrlForPath(route.path);

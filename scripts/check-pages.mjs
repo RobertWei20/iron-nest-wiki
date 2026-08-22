@@ -22,7 +22,16 @@ const guideIndex = {
   h2Count: 4,
 };
 
-const checks = [
+const privacy = {
+  title: 'Privacy Policy - Iron Nest Wiki',
+  description:
+    'Privacy policy for Iron Nest Wiki, including how this fan-made guide site uses Google Analytics and external links.',
+  keywords: 'Iron Nest Wiki privacy, Google Analytics, fan-made guide site',
+  robots: 'noindex, follow',
+  h2Count: 4,
+};
+
+const indexableChecks = [
   routeCheck('/', join(root, 'index.html'), home),
   routeCheck('/guides/', join(root, 'guides', 'index.html'), guideIndex),
   ...pages.map((page) =>
@@ -35,6 +44,7 @@ const checks = [
     }),
   ),
 ];
+const checks = [...indexableChecks, routeCheck('/privacy/', join(root, 'privacy', 'index.html'), privacy)];
 
 const failures = [];
 
@@ -131,6 +141,7 @@ async function checkStaticSeoFiles() {
   for (const route of checks) {
     const html = await readRequiredFile(route.filePath, `${route.path} static HTML`);
     const canonical = `${siteUrl}${route.path}`;
+    const robots = route.robots || 'index, follow';
 
     expectIncludes(html, `<title>${escapeHtml(route.title)}</title>`, `${route.path} static title`);
     expectIncludes(
@@ -138,15 +149,20 @@ async function checkStaticSeoFiles() {
       `<meta name="description" content="${escapeHtml(route.description)}" />`,
       `${route.path} static description`,
     );
-    expectIncludes(html, '<meta name="robots" content="index, follow" />', `${route.path} robots meta`);
+    expectIncludes(html, `<meta name="robots" content="${robots}" />`, `${route.path} robots meta`);
     expectIncludes(html, `<link rel="canonical" href="${canonical}" />`, `${route.path} canonical`);
     expectIncludes(html, `<meta property="og:url" content="${canonical}" />`, `${route.path} og:url`);
-    expectIncludes(sitemap, `<loc>${canonical}</loc>`, `${route.path} sitemap loc`);
   }
 
+  for (const route of indexableChecks) {
+    const canonical = `${siteUrl}${route.path}`;
+    expectIncludes(sitemap, `<loc>${canonical}</loc>`, `${route.path} sitemap loc`);
+  }
+  if (sitemap.includes(`${siteUrl}/privacy/`)) failures.push('sitemap.xml should not include the noindex privacy route');
+
   const sitemapUrlCount = (sitemap.match(/<url>/g) || []).length;
-  if (sitemapUrlCount !== checks.length) {
-    failures.push(`sitemap.xml has ${sitemapUrlCount} URLs, expected ${checks.length}`);
+  if (sitemapUrlCount !== indexableChecks.length) {
+    failures.push(`sitemap.xml has ${sitemapUrlCount} URLs, expected ${indexableChecks.length}`);
   }
   expectIncludes(robots, 'User-agent: *', 'robots user agent');
   expectIncludes(robots, 'Allow: /', 'robots allow rule');

@@ -42,6 +42,7 @@ function getRoute() {
   const slug = pathname.replace(/^\//, '').replace(/\/$/, '');
   if (!slug) return { type: 'home' };
   if (slug === 'guides') return { type: 'guides', page: guideIndexSeo };
+  if (slug === 'privacy') return { type: 'privacy', page: privacySeo };
   const page = pages.find((item) => item.slug === slug);
   if (page) return { type: 'article', page };
   return { type: 'not-found', page: notFoundSeo };
@@ -52,6 +53,13 @@ const guideIndexSeo = {
   keyword: 'iron nest guides',
   description:
     'Browse every Iron Nest guide page, including beginner help, missions, triangulation, counter-battery, shell types, endings, multiplayer, and roadmap notes.',
+};
+
+const privacySeo = {
+  title: 'Privacy Policy',
+  keyword: 'iron nest wiki privacy',
+  description:
+    'Privacy policy for Iron Nest Wiki, including how this fan-made guide site uses Google Analytics and external links.',
 };
 
 const notFoundSeo = {
@@ -86,6 +94,7 @@ function setCanonical(href) {
 
 function canonicalPathForRoute(route) {
   if (route.type === 'guides') return '/guides/';
+  if (route.type === 'privacy') return '/privacy/';
   if (route.type === 'article') return `/${route.page.slug}/`;
   return '/';
 }
@@ -97,7 +106,7 @@ function setSeo(page, route) {
     'Fan-made Iron Nest wiki for beginner guides, mission walkthroughs, triangulation, shell choices, counter-battery tips, endings, and roadmap updates.';
   const keywords = `${page?.keyword || 'Iron Nest'}, guide, missions, triangulation, shell types`;
   const canonicalUrl = publicUrlForPath(canonicalPathForRoute(route));
-  const robots = route?.type === 'not-found' ? 'noindex, follow' : 'index, follow';
+  const robots = ['not-found', 'privacy'].includes(route?.type) ? 'noindex, follow' : 'index, follow';
 
   document.title = title.length <= 60 ? title : page.title;
   setMetaContent('meta[name="description"]', description, { name: 'description' });
@@ -541,6 +550,55 @@ function notFound() {
   `;
 }
 
+function privacyPage() {
+  return `
+    <article class="article-shell">
+      <div class="article-content">
+        <p class="eyebrow">Site Policy</p>
+        <h1>Privacy Policy</h1>
+        <p class="article-summary">
+          Iron Nest Wiki is an independent fan-made guide site. This page explains the limited analytics and linking
+          practices used to keep the site useful while avoiding personal accounts, payments, or user-submitted content.
+        </p>
+        <section class="article-section">
+          <h2>Analytics</h2>
+          <p>
+            The site uses Google Analytics through the Google tag to understand basic page usage, such as page views,
+            navigation paths, device category, approximate region, and outbound link interactions. This helps decide
+            which guides need updates. The site does not ask visitors to create accounts, enter passwords, make
+            payments, or submit gameplay saves.
+          </p>
+        </section>
+        <section class="article-section">
+          <h2>External Links</h2>
+          <p>
+            Guide pages link to official store, developer, community, and reference resources in a new tab. Those
+            external sites have their own privacy practices. Opening Steam, GOG, YouTube, Discord, Google, or a third
+            party guide source means their own policies apply.
+          </p>
+        </section>
+        <section class="article-section">
+          <h2>What This Site Does Not Collect</h2>
+          <p>
+            This static site does not run a login system, newsletter form, checkout, comment box, or contact form.
+            Avoid sending personal information through any URL query string or third-party page reached from this site.
+          </p>
+        </section>
+        <section class="article-section">
+          <h2>Google Analytics Information</h2>
+          <p>
+            Google explains how it uses information from sites that use its services at
+            <a class="source-link" href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">
+              Google partner sites policy
+            </a>.
+            Visitors can also use browser privacy controls, tracker blockers, or Google's opt-out tools where available.
+          </p>
+        </section>
+      </div>
+    </article>
+  `;
+}
+
 function footer() {
   return `
     <footer class="site-footer">
@@ -555,6 +613,7 @@ function footer() {
         ${sourceLinks
           .map(([label, href]) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`)
           .join('')}
+        <a href="${sitePath('/privacy/')}">Privacy Policy</a>
       </div>
     </footer>
   `;
@@ -567,6 +626,7 @@ function render() {
     home: homePage,
     guides: () => guideIndex(false),
     article: () => articlePage(route.page),
+    privacy: privacyPage,
     'not-found': notFound,
   }[route.type]();
   root.innerHTML = `${header()}<main>${body}</main>${footer()}`;
