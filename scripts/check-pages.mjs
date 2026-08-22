@@ -90,7 +90,7 @@ if (failures.length) {
 }
 
 console.log(
-  `Checked ${checks.length} routes: SEO, sitemap, robots, GA placeholder, source links, article depth, and quality-layer content passed.`,
+  `Checked ${checks.length} routes: SEO, sitemap, robots, GA tag readiness, source links, article depth, and quality-layer content passed.`,
 );
 
 function routeCheck(path, filePath, item) {
@@ -154,8 +154,11 @@ async function checkStaticSeoFiles() {
   expectIncludes(notFound, '<meta name="robots" content="noindex, follow" />', '404 noindex robots meta');
   expectIncludes(notFound, `<link rel="canonical" href="${siteUrl}/" />`, '404 canonical fallback');
 
-  if (!rootHtml.includes("window.__GA_MEASUREMENT_ID__ = ''")) {
-    failures.push('homepage is missing the GA measurement ID placeholder');
+  const gaMatch = rootHtml.match(/window\.__GA_MEASUREMENT_ID__ = '([^']*)'/);
+  if (!gaMatch) {
+    failures.push('homepage is missing the GA measurement ID assignment');
+  } else if (gaMatch[1] && !/^G-[A-Z0-9]+$/.test(gaMatch[1])) {
+    failures.push(`homepage has an invalid GA measurement ID: ${gaMatch[1]}`);
   }
   if (!rootHtml.includes('/^G-[A-Z0-9]+$/.test(gaId)')) {
     failures.push('homepage GA loader does not guard against an empty or invalid measurement ID');
